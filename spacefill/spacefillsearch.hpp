@@ -48,20 +48,22 @@ namespace BBSEARCH {
              * Called before local search
              * @param bestf record value (best value found)
              * @param inif initial value on the generated point
+             * @param n vector's dimension
              * @param x generated point
              * @param cnt current step number
              */
-            virtual void beforeLocalSearch(FT bestf, FT inif, const FT* x, int cnt) {
+            virtual void beforeLocalSearch(FT bestf, FT inif, int n, const FT* x, int cnt) {
             }
 
             /**
              * Called after local search
              * @param bestf record value (best value found)
              * @param curf value found by the local search
+             * @param n vector's dimension
              * @param x point found by the local search
              * @param cnt current step number
              */
-            virtual void afterLocalSearch(FT bestf, FT curf, const FT* x, int cnt) {
+            virtual void afterLocalSearch(FT bestf, FT curf, int n, const FT* x, int cnt) {
             }
 
             /**
@@ -69,10 +71,11 @@ namespace BBSEARCH {
              * @param prevf previous record value
              * @param newf new record value
              * @param prevx previous record value
+             * @param n vector's dimension
              * @param newx point found
              * @param cnt current step number
              */
-            virtual void update(FT prevf, FT bestf, const FT* prevx, const FT* newx, int cnt) {
+            virtual void update(FT prevf, FT bestf, int n, const FT* prevx, const FT* newx, int cnt) {
             }
 
         };
@@ -83,7 +86,7 @@ namespace BBSEARCH {
                     return false;
                 })
         : mProb(prob), mPointGenerator(pointGenerator), mLocalSearch(localSearch), mStopper(stopper), mWatcher(std::ref(mDefaultWatcher)) {
-                    
+
         }
 
         bool search(FT* x, FT& v) override {
@@ -93,11 +96,11 @@ namespace BBSEARCH {
             while (mPointGenerator.getPoint(tx)) {
                 cnt++;
                 double tv = mProb.mObjectives.at(0)->func(tx);
-                mWatcher.get().beforeLocalSearch(v, tv, tx, cnt);
+                mWatcher.get().beforeLocalSearch(v, tv, n, tx, cnt);
                 mLocalSearch.search(tx, tv);
-                mWatcher.get().afterLocalSearch(v, tv, tx, cnt);
+                mWatcher.get().afterLocalSearch(v, tv, n, tx, cnt);
                 if (tv < v) {
-                    mWatcher.get().update(v, tv, x, tx, cnt);
+                    mWatcher.get().update(v, tv, n, x, tx, cnt);
                     snowgoose::VecUtils::vecCopy(n, tx, x);
                     v = tv;
                 }
@@ -114,17 +117,17 @@ namespace BBSEARCH {
         void setWatcher(Watcher& watcher) {
             mWatcher = watcher;
         }
-        
+
         std::string about() const override {
-            return mPointGenerator.about() + mLocalSearch.about();
+            return mPointGenerator.about() + " + " + mLocalSearch.about();
         }
 
-        
+
     private:
         const COMPI::MPProblem<FT>& mProb;
         COMPI::Solver<FT>& mLocalSearch;
         snowgoose::PointGenerator<FT>& mPointGenerator;
-        Stopper mStopper;        
+        Stopper mStopper;
         Watcher mDefaultWatcher;
         std::reference_wrapper<Watcher> mWatcher;
     };

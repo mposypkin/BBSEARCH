@@ -19,7 +19,7 @@
 #include "spacefillsearch.hpp"
 
 class MyWatcher : public BBSEARCH::SpaceFillSearch<double>::Watcher {
-    void update(double prevf, double bestf, const double* prevx, const double* newx, int cnt) override {
+    void update(double prevf, double bestf, int n, const double* prevx, const double* newx, int cnt) override {
         std::cout << "Record update from  " << prevf << " to " << bestf << " on step " << cnt << "\n";
     }
 };
