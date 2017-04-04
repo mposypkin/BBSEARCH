@@ -34,12 +34,7 @@ int main(int argc, char** argv) {
     OPTITEST::DejongProblemFactory fact(n, -4, 8);
     COMPI::MPProblem<double> *mpp = fact.getProblem();
     snowgoose::RandomPointGenerator<double> gener(*(mpp->mBox), num);
-    LOCSEARCH::VarCoorDesc<double> desc(*mpp, [&](double xdiff, double fdiff, const std::vector<double>& gran, double fval, int cnt) {
-        if (cnt <= maxLocalSteps)
-            return false;
-        else
-            return true;
-    });
+    LOCSEARCH::VarCoorDesc<double> desc(*mpp);
     BBSEARCH::SpaceFillSearch<double> sfSearch(*mpp, gener, desc);
     MyWatcher watcher;
     sfSearch.setWatcher(watcher);
